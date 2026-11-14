@@ -131,4 +131,23 @@ public sealed class ServicesTests
 
         Assert.Equal(50, repository.LastRequest!.Limit);
     }
+
+    [Fact]
+    public async Task NewsImpactService_validates_horizon_and_normalizes_pagination()
+    {
+        var repository = new FakeNewsImpactRepository();
+        var service = new NewsImpactService(repository);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => service.GetAsync(
+            new NewsImpactQueryRequest { HorizonMinutes = 30 }, CancellationToken.None));
+
+        await service.GetAsync(new NewsImpactQueryRequest
+        {
+            Symbol = "BTCUSDT",
+            HorizonMinutes = 5,
+            Limit = 0
+        }, CancellationToken.None);
+        Assert.Equal(50, repository.LastRequest!.Limit);
+        Assert.Equal(5, repository.LastRequest.HorizonMinutes);
+    }
 }

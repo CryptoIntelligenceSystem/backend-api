@@ -90,6 +90,19 @@ internal sealed class FakeNewsRepository : INewsRepository
     }
 }
 
+internal sealed class FakeNewsImpactRepository : INewsImpactRepository
+{
+    public NewsImpactQueryRequest? LastRequest { get; private set; }
+
+    public Task<PagedResult<NewsImpactResponse>> QueryAsync(
+        NewsImpactQueryRequest request,
+        CancellationToken cancellationToken)
+    {
+        LastRequest = request;
+        return Task.FromResult(new PagedResult<NewsImpactResponse>([], request.Limit, request.Offset, false));
+    }
+}
+
 internal sealed class FakeCandleService : ICandleService
 {
     public IReadOnlyList<CandleResponse> Result { get; set; } = [];

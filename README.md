@@ -11,6 +11,7 @@ Backend chỉ đọc các bảng đang dùng trong pipeline:
 - `pipeline.indicators`: chỉ báo, hiện có `ma20`.
 - `pipeline.signals`: tín hiệu, hiện có `volume_anomaly`.
 - `pipeline.news_data`: tin tức, sẽ có dữ liệu khi pipeline ghi news vào ClickHouse.
+- `pipeline.news_impact`: biến động giá ở mốc 5/15/60 phút sau khi đăng tin; kết quả chỉ thể hiện quan hệ thời gian.
 
 `pipeline.analysis_results` là bảng cũ và không được Backend sử dụng.
 
@@ -107,6 +108,7 @@ Khi Backend chạy ở `http://localhost:5080`:
 | GET | `/api/v1/indicators` | Lấy chỉ báo, mặc định `ma20` |
 | GET | `/api/v1/signals` | Lấy tín hiệu, mặc định `volume_anomaly` |
 | GET | `/api/v1/news` | Lấy tin tức |
+| GET | `/api/v1/news/impact` | Lấy biến động giá sau tin, lọc theo `symbol`, `horizonMinutes`, thời gian và phân trang |
 | GET | `/api/v1/status` | Thống kê số dòng và thời điểm cập nhật |
 
 Ví dụ:
@@ -118,6 +120,7 @@ http://localhost:5080/api/v1/market/minute-candles?symbol=BTCUSDT&from=2026-10-2
 http://localhost:5080/api/v1/indicators?symbol=BTCUSDT&interval=1m&name=ma20&onlyReady=true&limit=20
 http://localhost:5080/api/v1/signals?symbol=BTCUSDT&signalType=volume_anomaly&limit=20
 http://localhost:5080/api/v1/news?symbol=BTCUSDT&limit=20&offset=0
+http://localhost:5080/api/v1/news/impact?symbol=BTCUSDT&horizonMinutes=15&limit=20&offset=0
 http://localhost:5080/api/v1/status
 ```
 

@@ -78,6 +78,20 @@ public sealed class NewsService(INewsRepository repository) : INewsService
     }
 }
 
+public sealed class NewsImpactService(INewsImpactRepository repository) : INewsImpactService
+{
+    public Task<PagedResult<NewsImpactResponse>> GetAsync(NewsImpactQueryRequest request, CancellationToken cancellationToken)
+    {
+        QueryRules.ValidateSymbol(request.Symbol, required: false);
+        if (request.HorizonMinutes is not null and not (5 or 15 or 60))
+            throw new ArgumentException("horizonMinutes must be 5, 15, or 60.");
+        request.Limit = QueryRules.ValidateLimit(request.Limit, 50);
+        request.Offset = QueryRules.ValidateOffset(request.Offset);
+        QueryRules.Range(request.From, request.To);
+        return repository.QueryAsync(request, cancellationToken);
+    }
+}
+
 public sealed class StatusService(IStatusRepository repository) : IStatusService
 {
     public Task<PipelineStatusResponse> GetAsync(CancellationToken cancellationToken) =>

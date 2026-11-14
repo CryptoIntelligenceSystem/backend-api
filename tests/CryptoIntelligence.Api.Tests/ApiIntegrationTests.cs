@@ -52,6 +52,7 @@ public sealed class ApiIntegrationTests
         Assert.Contains("/api/v1/market/candles", body);
         Assert.Contains("/api/v1/market/minute-candles", body);
         Assert.Contains("/api/v1/news", body);
+        Assert.Contains("/api/v1/news/impact", body);
         Assert.Contains("/api/v1/signals", body);
     }
 
