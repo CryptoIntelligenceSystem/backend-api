@@ -96,6 +96,30 @@ public sealed class RepositoriesTests
     }
 
     [Fact]
+    public async Task NewsImpactRepository_filters_and_paginates_observations()
+    {
+        var client = new FakeClickHouseClient();
+        var repository = new NewsImpactRepository(client);
+
+        await repository.QueryAsync(new NewsImpactQueryRequest
+        {
+            Symbol = "BTCUSDT",
+            HorizonMinutes = 15,
+            Limit = 10,
+            Offset = 20,
+            From = FixedFrom(),
+            To = FixedTo()
+        }, CancellationToken.None);
+
+        var sql = client.Queries.Single();
+        Assert.Contains("FROM pipeline.news_impact FINAL", sql);
+        Assert.Contains("symbol = 'BTCUSDT'", sql);
+        Assert.Contains("horizon_minutes = 15", sql);
+        Assert.Contains("LIMIT 11", sql);
+        Assert.Contains("OFFSET 20", sql);
+    }
+
+    [Fact]
     public async Task MarketDataRepository_queries_one_minute_market_table_with_pagination()
     {
         var client = new FakeClickHouseClient();
@@ -126,15 +150,25 @@ public sealed class RepositoriesTests
         var client = new FakeClickHouseClient();
         client.Results[typeof(PipelineStatusResponse)] = new List<PipelineStatusResponse>
         {
-            new() { MarketDataCount = 198, Candle5mCount = 38, SignalCount = 8 }
+            new()
+            {
+                MarketDataCount = 198,
+                NewsDataCount = 12,
+                Candle5mCount = 38,
+                SignalCount = 8,
+                LatestNewsTime = "2026-10-29 12:00:00.000"
+            }
         };
         var repository = new StatusRepository(client);
 
         var result = await repository.GetAsync(CancellationToken.None);
 
         Assert.Equal(198, result.MarketDataCount);
+        Assert.Equal(12, result.NewsDataCount);
         Assert.Equal(38, result.Candle5mCount);
+        Assert.Equal("2026-10-29 12:00:00.000", result.LatestNewsTime);
         Assert.Contains("pipeline.market_data", client.Queries.Single());
+        Assert.Contains("pipeline.news_data", client.Queries.Single());
     }
 
     private static CandleQueryRequest FixedCandleRequest() => new()

@@ -16,12 +16,14 @@ builder.Services.AddScoped<IMarketDataRepository, MarketDataRepository>();
 builder.Services.AddScoped<IIndicatorRepository, IndicatorRepository>();
 builder.Services.AddScoped<ISignalRepository, SignalRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
+builder.Services.AddScoped<INewsImpactRepository, NewsImpactRepository>();
 builder.Services.AddScoped<IStatusRepository, StatusRepository>();
 builder.Services.AddScoped<ICandleService, CandleService>();
 builder.Services.AddScoped<IMarketDataService, MarketDataService>();
 builder.Services.AddScoped<IIndicatorService, IndicatorService>();
 builder.Services.AddScoped<ISignalService, SignalService>();
 builder.Services.AddScoped<INewsService, NewsService>();
+builder.Services.AddScoped<INewsImpactService, NewsImpactService>();
 builder.Services.AddScoped<IStatusService, StatusService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>

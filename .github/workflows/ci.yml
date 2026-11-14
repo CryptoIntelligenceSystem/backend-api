@@ -1,0 +1,17 @@
+name: backend-api CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  dotnet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - run: dotnet restore tests/CryptoIntelligence.Api.Tests/CryptoIntelligence.Api.Tests.csproj
+      - run: dotnet build tests/CryptoIntelligence.Api.Tests/CryptoIntelligence.Api.Tests.csproj --no-restore --configuration Release
+      - run: dotnet test tests/CryptoIntelligence.Api.Tests/CryptoIntelligence.Api.Tests.csproj --no-build --configuration Release

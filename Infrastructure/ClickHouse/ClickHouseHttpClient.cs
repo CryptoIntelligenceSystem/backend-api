@@ -24,23 +24,34 @@ public sealed class ClickHouseHttpClient : IClickHouseClient
         };
         AddAuthentication(request);
 
-        using var response = await _httpClient.SendAsync(
-            request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            throw new ClickHouseException($"ClickHouse returned {(int)response.StatusCode}: {body}");
-        }
+            using var response = await _httpClient.SendAsync(
+                request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        var result = new List<T>();
-        var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        foreach (var line in body.Split('\n', StringSplitOptions.RemoveEmptyEntries))
-        {
-            var item = JsonSerializer.Deserialize<T>(line, jsonOptions);
-            if (item is not null) result.Add(item);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ClickHouseException($"ClickHouse returned {(int)response.StatusCode}: {body}");
+            }
+
+            var result = new List<T>();
+            var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            foreach (var line in body.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var item = JsonSerializer.Deserialize<T>(line, jsonOptions);
+                if (item is not null) result.Add(item);
+            }
+            return result;
         }
-        return result;
+        catch (HttpRequestException exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new ClickHouseException("Could not connect to ClickHouse.", exception);
+        }
+        catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new ClickHouseException("The ClickHouse request timed out.", exception);
+        }
     }
 
     public async Task<bool> PingAsync(CancellationToken cancellationToken = default)
@@ -50,7 +61,6 @@ public sealed class ClickHouseHttpClient : IClickHouseClient
             await QueryAsync<PingRow>("SELECT 1 AS value", cancellationToken);
             return true;
         }
-        catch (HttpRequestException) { return false; }
         catch (ClickHouseException) { return false; }
     }
 

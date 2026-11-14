@@ -28,6 +28,11 @@ public interface INewsService
     Task<PagedResult<NewsResponse>> GetAsync(NewsQueryRequest request, CancellationToken cancellationToken);
 }
 
+public interface INewsImpactService
+{
+    Task<PagedResult<NewsImpactResponse>> GetAsync(NewsImpactQueryRequest request, CancellationToken cancellationToken);
+}
+
 public interface IStatusService
 {
     Task<PipelineStatusResponse> GetAsync(CancellationToken cancellationToken);
